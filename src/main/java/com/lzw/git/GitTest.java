@@ -7,5 +7,8 @@ package com.lzw.git;
 public class GitTest {
     public static void main(String[] args) {
         System.out.println();
+        System.out.println("abc");
+        System.out.println("cdf");
+
     }
 }
