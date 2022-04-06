@@ -12,6 +12,7 @@ public class GitTest {
         System.out.println("cdfa");
 
         System.out.println("master 4");
+        System.out.println("new 4");
 
     }
 }
