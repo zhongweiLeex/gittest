@@ -25,8 +25,8 @@ public class CustomerForQuery {
         Customer customer = queryForCustomersCommon(sql, 18,"lxy");
         System.out.println(customer);
 
-        String sql1 = "select id,name,birth,email from customers where email = ? ";
-        Customer customer1 = queryForCustomersCommon(sql, "sdf");
+        String sql1 = "select id,name,birth,email from customers where email = ? and name = ?";
+        Customer customer1 = queryForCustomersCommon(sql1, "lzw10033@Gmail.com","李忠伟");
         System.out.println(customer1);
     }
     /* *
