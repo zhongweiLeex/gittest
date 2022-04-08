@@ -23,6 +23,13 @@ public class PreparedStatementUpdateTest {
     //添加
     //向customers表中添加一条记录
     @Test
+    /* *
+     * @Author zhongweiLee
+     * @Description 未使用工具类，普通update操作
+     * @Date 15:44 2022/4/8
+     * @Param []
+     * @return void
+     **/
     public void testInsert(){
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -75,8 +82,14 @@ public class PreparedStatementUpdateTest {
             }
         }
     }
-    //修改
     @Test
+    /* *
+     * @Author zhongweiLee
+     * @Description //TODO 普通update操作操作
+     * @Date 15:44 2022/4/8
+     * @Param []
+     * @return void
+     **/
     public void testUpdate(){
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -99,19 +112,25 @@ public class PreparedStatementUpdateTest {
         }
     }
 
-    /*
-    * 通用增删改操作 测试
-    * */
     @Test
+    /* *
+     * @Author zhongweiLee
+     * @Description 测试通用update操作
+     * @Date 15:49 2022/4/8
+     * @Param []
+     * @return void
+     **/
     public void testGenerateUpdate(){
         String sql = "delete from customers where id = ?";
         generateUpdate(sql,3);
     }
-    /**
-     * 通用的增删改操作
-     * @param sql sql语句
-     * @param args 占位符参数
-     */
+    /* *
+     * @Author zhongweiLee
+     * @Description //TODO 通用update操作
+     * @Date 15:50 2022/4/8
+     * @Param [sql, args]
+     * @return void
+     **/
     public void generateUpdate(String sql,Object ... args){
         Connection connection = null;
         PreparedStatement statement = null;

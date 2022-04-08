@@ -49,11 +49,11 @@ public class CustomerForQuery {
             for (int i = 1; i <= args.length; i++) {
                 preparedStatement.setObject(i, args[i-1]);//将指定字段赋给 preparedStatement 填充占位符
             }
-
+            //获取结果集
             resultSet = preparedStatement.executeQuery();
-
+            //获取结果集元数据
             ResultSetMetaData metaData = resultSet.getMetaData();//获取结果集的元数据
-
+            //通过结果集元数据获取列个数
             int columnCount = metaData.getColumnCount();//通过元数据 获取结果集的列数量
 
             //返回查询的一条语句
@@ -65,11 +65,14 @@ public class CustomerForQuery {
                     //获取每个指定列的列值
                     Object columnValue = resultSet.getObject(i + 1);
 
-                    //获取每个指定列的列名
-                    String columnName = metaData.getColumnName(i + 1);
-
+                    //获取每个指定列的列名 -- 不推荐使用
+                    //String columnName = metaData.getColumnName(i + 1);
+                    //获取每个指定列的别名 -- 推荐使用
+                    //通过结果集元数据获取列别名
+                    String columnLabel = metaData.getColumnLabel(i+1);
+                    //通过反射
                     //给customer对象的指定 columnName属性赋值为 columnValue : 通过 反射
-                    Field field = Customer.class.getDeclaredField(columnName);
+                    Field field = Customer.class.getDeclaredField(columnLabel);
                     field.setAccessible(true);
                     field.set(customer,columnValue);
                 }
