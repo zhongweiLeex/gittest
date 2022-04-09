@@ -68,7 +68,12 @@ class CustomerImplDAOTest {
 
     @Test
     void getCustomerById() {
-        Connection conn = JDBCUtils.getConnection1();
+        Connection conn = null;
+        try {
+            conn = JDBCUtils.getConnection1();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         try {
             Customer customer = dao.getCustomerById(conn, 20);

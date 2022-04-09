@@ -1,5 +1,6 @@
 package util;
 
+import com.alibaba.druid.pool.DruidDataSourceFactory;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.dbcp2.BasicDataSourceFactory;
 
@@ -96,6 +97,32 @@ public class JDBCUtils {
         return connection;
     }
 
+    /* *
+     * @Author zhongweiLee
+     * @Description 使用druid数据库连接池技术
+     * @Date 20:57 2022/4/9
+     * @ParamsType
+     * @ParamsName
+     * @return
+     **/
+    private static DataSource source1;
+    static{
+        try {
+            Properties pros = new Properties();
+            InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream("druid.properties");
+            pros.load(is);
+
+            DataSource source = DruidDataSourceFactory.createDataSource(pros);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public static Connection getConnection4() throws Exception{
+        Connection connection = source.getConnection();
+        System.out.println(connection);
+        return connection;
+
+    }
 
 
     /* *
