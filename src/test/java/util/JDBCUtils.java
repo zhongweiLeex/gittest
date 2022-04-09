@@ -60,7 +60,7 @@ public class JDBCUtils {
      * @ParamsName []
      * @return java.sql.Connection
      **/
-    private static ComboPooledDataSource cpds = new ComboPooledDataSource("helloc3p0");
+    private static final ComboPooledDataSource cpds = new ComboPooledDataSource("helloc3p0");
     public static Connection getConnection2() throws SQLException {
         return cpds.getConnection();
     }
@@ -112,13 +112,13 @@ public class JDBCUtils {
             InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream("druid.properties");
             pros.load(is);
 
-            DataSource source = DruidDataSourceFactory.createDataSource(pros);
+           source1 = DruidDataSourceFactory.createDataSource(pros);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
     public static Connection getConnection4() throws Exception{
-        Connection connection = source.getConnection();
+        Connection connection = source1.getConnection();
         System.out.println(connection);
         return connection;
 
