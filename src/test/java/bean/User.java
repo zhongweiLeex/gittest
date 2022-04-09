@@ -2,7 +2,7 @@ package bean;
 
 /**
  * @ClassName User
- * @Description TODO
+ * @Description User类
  * @Author Administrator
  * @Date 2022/4/8 14:41
  * @Version 1.0
