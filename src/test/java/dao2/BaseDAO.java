@@ -1,49 +1,129 @@
-package test;
+package dao2;
 
-import bean.Customer;
-import bean.User;
-import org.junit.jupiter.api.Test;
 import util.JDBCUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @ClassName PreparedStatementQueryTest
- * @Description 使用PreparedStatement实现对不同表的查询操作
+ * @ClassName BaseDAO
+ * @Description 封装针对于数据表的通用操作
  * @Author Administrator
- * @Date 2022/4/8 14:29
+ * @Date 2022/4/9 10:52
  * @Version 1.0
  **/
-public class PreparedStatementQueryTest {
-    @Test
-    public void testGetForList(){
-        String sql = "select id,name,email from customers where id < ?";
-        List<Customer> list = getForList(Customer.class, sql, 12);
-        list.forEach(System.out::println);//方法引用
+public abstract class BaseDAO<T> {
+
+    private Class<T> clazz = null;
+
+    //获取当前BaseDAO 子类继承父类中的泛型
+    {
+        Type genericSuperclass = this.getClass().getGenericSuperclass();//子类自己获取父类的泛型
+        ParameterizedType parameterizedType = (ParameterizedType) genericSuperclass;//将父类泛型转换成参数类型
+        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();//获取父类泛型参数
+
+        clazz = (Class<T>) actualTypeArguments[0]; //泛型的第一个参数就是 对应表的类 customer
     }
 
     /* *
      * @Author zhongweiLee
-     * @Description 返回多条查询结果
-     * 步骤：
-     * 1. 获取连接
-     * 2. 通过sql语句创建 PreparedStatement
-     * 3. 向preparedStatement对象中填充占位符 setObject
-     * 4. 执行preparedStatement语句 获取 结果集 executeQuery
-     * 5. 获取结果集元数据 getMetaData
-     * 6. 通过元数据获取列数
-     * 7. 通过列数,获取指定列的列值，给t对象指定的属性赋值
-     * @Date 15:27 2022/4/8
-     * @Param [clazz, sql, args]
+     * @Description 通用增删改 --- version 2.0 考虑事务
+     * @Date 13:12 2022/4/9
+     * @ParamsType [java.sql.Connection, java.lang.String, java.lang.Object...]
+     * @ParamsName [conn, sql, args]
+     * @return int
+     **/
+    public int update(Connection conn, String sql, Object...args){
+        PreparedStatement ps = null;
+        try {
+            //1. 获取 PreparedStatement 实例  预编译 SQL语句
+            ps = conn.prepareStatement(sql);
+            //2.填充SQL语句占位符
+            for(int i = 0 ; i< args.length;i++){
+                ps.setObject(i+1,args[i]);
+            }
+            //3. 执行SQL语句
+            return ps.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            JDBCUtils.closeConnection(null,ps);
+        }
+        return 0;
+    }
+
+
+    /* *
+     * @Author zhongweiLee
+     * @Description 通用查询操作 返回一个对象 考虑事务
+     * @Date 13:11 2022/4/9
+     * @ParamsType [java.sql.Connection, java.lang.Class<T>, java.lang.String, java.lang.Object...]
+     * @ParamsName [connection, clazz, sql, args]
+     * @return T
+     **/
+    public T getInstance(Connection connection,String sql,Object...args){
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        //执行查询操作
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            //填充占位符
+            for (int i = 1; i <= args.length; i++) {
+                preparedStatement.setObject(i, args[i-1]);//将指定字段赋给 preparedStatement 填充占位符
+            }
+            //获取结果集
+            resultSet = preparedStatement.executeQuery();
+            //获取结果集元数据
+            ResultSetMetaData metaData = resultSet.getMetaData();//获取结果集的元数据
+            //通过结果集元数据获取列个数
+            int columnCount = metaData.getColumnCount();//通过元数据 获取结果集的列数量
+
+
+            if (resultSet.next()){
+
+                //Customer customer = new Customer();
+                T t = clazz.getDeclaredConstructor().newInstance();
+
+                for (int i = 0; i < columnCount; i++) {
+                    //获取每个指定列的列值
+                    Object columnValue = resultSet.getObject(i + 1);
+
+                    //获取每个指定列的列名 -- 不推荐使用
+                    //String columnName = metaData.getColumnName(i + 1);
+                    //获取每个指定列的别名 -- 推荐使用
+                    //通过结果集元数据获取列别名
+                    String columnLabel = metaData.getColumnLabel(i+1);
+                    //通过反射
+                    //给customer对象的指定 columnName属性赋值为 columnValue : 通过 反射
+                    Field field = clazz.getDeclaredField(columnLabel);
+                    field.setAccessible(true);
+                    field.set(t,columnValue);
+                }
+//                System.out.println(t);
+                return t;
+            }
+        } catch (SQLException | NoSuchFieldException | IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            JDBCUtils.closeResource(null,preparedStatement,resultSet);//关闭资源
+        }
+        return null;
+    }
+
+    /* *
+     * @Author zhongweiLee
+     * @Description 通用查询操作 返回多个对象 考虑事务
+     * @Date 13:11 2022/4/9
+     * @ParamsType [java.sql.Connection, java.lang.Class<T>, java.lang.String, java.lang.Object...]
+     * @ParamsName [connection, clazz, sql, args]
      * @return java.util.List<T>
      **/
-    public <T> List<T> getForList(Class<T> clazz,String sql,Object...args){
-
-        Connection connection = JDBCUtils.getConnection1();
+    public List<T> getForList(Connection connection, String sql, Object...args){
 
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -89,79 +169,39 @@ public class PreparedStatementQueryTest {
         } catch (SQLException | NoSuchFieldException | IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException throwables) {
             throwables.printStackTrace();
         } finally {
-            JDBCUtils.closeResource(connection,preparedStatement,resultSet);//关闭资源
+            JDBCUtils.closeResource(null,preparedStatement,resultSet);//关闭资源
         }
         return null;
-
     }
-    @Test
-    public void testGetInstance(){
-        String sql = "select id,name,email from customers where id = ?";
-        Customer customer = getInstance(Customer.class, sql, 12);
-        System.out.println(customer);
 
-        String sql1 = "select id,name,password from user where id = ?";
-        User user = getInstance(User.class, sql1, 1);
-        System.out.println(user);
 
-    }
     /* *
      * @Author zhongweiLee
-     * @Description 通用查询操作，对不同的表进行查询， 使用泛型方法， 返回一条记录
-     * @Date 15:55 2022/4/8
-     * @Param [clazz, sql, args]
-     * @return T
+     * @Description 用于查询特殊值的通用方法
+     * @Date 13:12 2022/4/9
+     * @ParamsType [java.sql.Connection, java.lang.String, java.lang.Object...]
+     * @ParamsName [conn, sql, args]
+     * @return E
      **/
-    public <T> T getInstance(Class<T> clazz,String sql,Object...args){
-        Connection connection = JDBCUtils.getConnection1();
+    public <E> E getValue(Connection conn,String sql,Object... args){
 
-        PreparedStatement preparedStatement = null;
+        PreparedStatement ps = null;
         ResultSet resultSet = null;
-        //执行查询操作
         try {
-            preparedStatement = connection.prepareStatement(sql);
-            //填充占位符
-            for (int i = 1; i <= args.length; i++) {
-                preparedStatement.setObject(i, args[i-1]);//将指定字段赋给 preparedStatement 填充占位符
+            ps = conn.prepareStatement(sql);
+            for (int i = 0; i < args.length; i++) {
+                ps.setObject(i+1,args[i]);
             }
-            //获取结果集
-            resultSet = preparedStatement.executeQuery();
-            //获取结果集元数据
-            ResultSetMetaData metaData = resultSet.getMetaData();//获取结果集的元数据
-            //通过结果集元数据获取列个数
-            int columnCount = metaData.getColumnCount();//通过元数据 获取结果集的列数量
-
-
+            resultSet = ps.executeQuery();
             if (resultSet.next()){
-
-                //Customer customer = new Customer();
-                T t = clazz.getDeclaredConstructor().newInstance();
-
-                for (int i = 0; i < columnCount; i++) {
-                    //获取每个指定列的列值
-                    Object columnValue = resultSet.getObject(i + 1);
-
-                    //获取每个指定列的列名 -- 不推荐使用
-                    //String columnName = metaData.getColumnName(i + 1);
-                    //获取每个指定列的别名 -- 推荐使用
-                    //通过结果集元数据获取列别名
-                    String columnLabel = metaData.getColumnLabel(i+1);
-                    //通过反射
-                    //给customer对象的指定 columnName属性赋值为 columnValue : 通过 反射
-                    Field field = clazz.getDeclaredField(columnLabel);
-                    field.setAccessible(true);
-                    field.set(t,columnValue);
-                }
-//                System.out.println(t);
-                return t;
+                return (E) resultSet.getObject(1);
             }
-        } catch (SQLException | NoSuchFieldException | IllegalAccessException | InstantiationException | InvocationTargetException | NoSuchMethodException throwables) {
+        } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
-            JDBCUtils.closeResource(connection,preparedStatement,resultSet);//关闭资源
+            JDBCUtils.closeResource(null,ps,resultSet);
         }
         return null;
-
-        
     }
+
 }

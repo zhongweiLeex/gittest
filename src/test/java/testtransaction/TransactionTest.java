@@ -19,7 +19,7 @@ public class TransactionTest {
     @Test
     public void transactionTest(){
         //1. 获取数据库连接
-        Connection conn = JDBCUtils.getConnection();
+        Connection conn = JDBCUtils.getConnection1();
         try {
 
             //2. 开启事务 关闭自动提交
@@ -71,19 +71,36 @@ public class TransactionTest {
                 ps.setObject(i+1,args[i]);
             }
             //3. 执行SQL语句
-            ps.execute();
+            ps.executeUpdate();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         } finally {
             JDBCUtils.closeConnection(null,ps);
         }
-
-
+    }
+    //通用增删改 --- version 2.0 考虑事务
+    public int update2(Connection conn,String sql,Object...args){
+        PreparedStatement ps = null;
+        try {
+            //1. 获取 PreparedStatement 实例  预编译 SQL语句
+            ps = conn.prepareStatement(sql);
+            //2.填充SQL语句占位符
+            for(int i = 0 ; i< args.length;i++){
+                ps.setObject(i+1,args[i]);
+            }
+            //3. 执行SQL语句
+            return ps.executeUpdate();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            JDBCUtils.closeConnection(null,ps);
+        }
+        return 0;
     }
 
     @Test
     public void testTxSelect() throws ClassNotFoundException, SQLException {
-        Connection connection = JDBCUtils.getConnection();
+        Connection connection = JDBCUtils.getConnection1();
         //获取事务隔离级别
         System.out.println(connection.getTransactionIsolation());
         //设置数据库隔离级别
@@ -97,7 +114,7 @@ public class TransactionTest {
     }
     @Test
     public void testTxUpdate() throws InterruptedException, SQLException {
-        Connection connection = JDBCUtils.getConnection();
+        Connection connection = JDBCUtils.getConnection1();
         connection.setAutoCommit(false);
         String sql = "update user set address = ? where name = ?";
         update(connection,sql,"American","LadyGaga");
@@ -113,7 +130,7 @@ public class TransactionTest {
      * @return T
      **/
     public <T> T getInstance(Connection connection,Class<T> clazz,String sql,Object...args){
-//        Connection connection = JDBCUtils.getConnection();
+//        Connection connection = JDBCUtils.getConnection1();
 
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;

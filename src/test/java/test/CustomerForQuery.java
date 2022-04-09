@@ -6,9 +6,6 @@ import util.JDBCUtils;
 
 import java.lang.reflect.Field;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @ClassName CustomerForQuery
@@ -38,7 +35,7 @@ public class CustomerForQuery {
      * 重点： 通过元数据 获得结果集的数量
      **/
     public Customer queryForCustomersCommon(String sql, Object... args){
-        Connection connection = JDBCUtils.getConnection();
+        Connection connection = JDBCUtils.getConnection1();
 
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -98,7 +95,7 @@ public class CustomerForQuery {
      * @return void
      **/
     public void queryForCustomersNoCommon(){
-        Connection connection = JDBCUtils.getConnection();
+        Connection connection = JDBCUtils.getConnection1();
         String sql = "select * from customers where id = ?";
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;

@@ -33,7 +33,7 @@ public class InsertTest {
      * @return void
      **/
     public void insert(){
-        Connection connection = JDBCUtils.getConnection();
+        Connection connection = JDBCUtils.getConnection1();
         PreparedStatement ps = null;
         try {
             long start = System.currentTimeMillis();
@@ -63,7 +63,7 @@ public class InsertTest {
      **/
     @Test
     public void insert2(){
-        Connection conn = JDBCUtils.getConnection();
+        Connection conn = JDBCUtils.getConnection1();
         PreparedStatement ps = null;
         try {
             long start = System.currentTimeMillis();
@@ -101,7 +101,7 @@ public class InsertTest {
      **/
     @Test
     public void insert3(){
-        Connection conn = JDBCUtils.getConnection();
+        Connection conn = JDBCUtils.getConnection1();
         PreparedStatement ps = null;
         try {
             //设置不允许自动提交数据

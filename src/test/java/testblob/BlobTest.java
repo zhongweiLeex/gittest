@@ -24,7 +24,7 @@ public class BlobTest {
      * @return void
      **/
     public void testInsert(){
-        Connection conn = JDBCUtils.getConnection();
+        Connection conn = JDBCUtils.getConnection1();
         String sql = "insert into customers(name,email,birth,photo)values(?,?,?,?)";
         PreparedStatement ps = null;
         FileInputStream is = null;
@@ -58,7 +58,7 @@ public class BlobTest {
      * @return void
      **/
     public void testQuery(){
-        Connection connection = JDBCUtils.getConnection();
+        Connection connection = JDBCUtils.getConnection1();
         String sql = "select id,name,email,birth,photo from customers where id = ?";
 
         PreparedStatement ps = null;

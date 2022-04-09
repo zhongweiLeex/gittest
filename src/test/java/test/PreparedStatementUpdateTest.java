@@ -85,7 +85,7 @@ public class PreparedStatementUpdateTest {
     @Test
     /* *
      * @Author zhongweiLee
-     * @Description //TODO 普通update操作操作
+     * @Description 普通update操作操作
      * @Date 15:44 2022/4/8
      * @Param []
      * @return void
@@ -94,7 +94,7 @@ public class PreparedStatementUpdateTest {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         //1.获取数据库连接
-        connection = JDBCUtils.getConnection();
+        connection = JDBCUtils.getConnection1();
         try {
             //2.预编译SQL语句
             String sql = "update customers set name = ? where id = ?";
@@ -126,7 +126,7 @@ public class PreparedStatementUpdateTest {
     }
     /* *
      * @Author zhongweiLee
-     * @Description //TODO 通用update操作
+     * @Description 通用update操作
      * @Date 15:50 2022/4/8
      * @Param [sql, args]
      * @return void
@@ -135,7 +135,7 @@ public class PreparedStatementUpdateTest {
         Connection connection = null;
         PreparedStatement statement = null;
         //1.获取连接
-        connection = JDBCUtils.getConnection();
+        connection = JDBCUtils.getConnection1();
         try {
             //2.预编译语句
             statement = connection.prepareStatement(sql);
