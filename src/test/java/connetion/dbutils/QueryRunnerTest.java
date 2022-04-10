@@ -3,16 +3,11 @@ package connetion.dbutils;
 import bean.Customer;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.ResultSetHandler;
-import org.apache.commons.dbutils.handlers.BeanHandler;
-import org.apache.commons.dbutils.handlers.BeanListHandler;
-import org.apache.commons.dbutils.handlers.MapHandler;
-import org.apache.commons.dbutils.handlers.MapListHandler;
+import org.apache.commons.dbutils.handlers.*;
 import org.junit.jupiter.api.Test;
 import util.JDBCUtils;
 
-import java.sql.Connection;
-import java.sql.JDBCType;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +21,7 @@ import java.util.Map;
 public class QueryRunnerTest {
     /* *
      * @Author zhongweiLee
-     * @Description 查询操作使用 DBUtils
+     * @Description 插入操作使用 DBUtils
      * @Date 21:39 2022/4/9
      * @ParamsType []
      * @ParamsName []
@@ -67,6 +62,7 @@ public class QueryRunnerTest {
         String sql = "select id,name,email,birth from customers where id = ?";
 
         ResultSetHandler<Customer> handler = new BeanHandler<>(Customer.class);
+
         Customer customer = null;
         try {
             customer = runner.query(connection, sql, handler, 23);
@@ -145,6 +141,14 @@ public class QueryRunnerTest {
         }
     }
 
+    /* *
+     * @Author zhongweiLee
+     * @Description MapListHandler ： 返回多个记录，记录表现形式是 map映射的形式
+     * @Date 15:05 2022/4/10
+     * @ParamsType []
+     * @ParamsName []
+     * @return void
+     **/
     @Test
     public void testQuery4(){
         QueryRunner runner = new QueryRunner();
@@ -170,5 +174,148 @@ public class QueryRunnerTest {
         }
     }
 
+    /* *
+     * @Author zhongweiLee
+     * @Description ScalarHandler： 处理规模数据  返回聚合函数之类的结果
+     * @Date 15:12 2022/4/10
+     * @ParamsType []
+     * @ParamsName []
+     * @return void
+     **/
+    @Test
+    public void testQuery5(){
+        QueryRunner runner = new QueryRunner();
+        Connection connection = null;
+        try {
+            connection = JDBCUtils.getConnection4();
+
+
+            String sql = "select count(*) from customers";
+
+            ScalarHandler<Object> handler = new ScalarHandler<>();
+            Long count = (Long) runner.query(connection, sql, handler);
+            System.out.println(count);
+
+        } catch (Exception throwables) {
+            throwables.printStackTrace();
+        }finally {
+            JDBCUtils.closeConnection(connection,null);
+        }
+    }
+
+
+    /* *
+     * @Author zhongweiLee
+     * @Description 使用Scalar 返回 count max 这种全局的聚合函数结果
+     * @Date 15:11 2022/4/10
+     * @ParamsType []
+     * @ParamsName []
+     * @return void
+     **/
+    @Test
+    public void testQuery6(){
+        QueryRunner runner = new QueryRunner();
+        Connection connection = null;
+        try {
+            connection = JDBCUtils.getConnection4();
+
+
+            String sql = "select max(birth) from customers";
+
+            ScalarHandler<Object> handler = new ScalarHandler<>();
+            Date maxBirth= (Date) runner.query(connection, sql, handler);
+            System.out.println(maxBirth);
+
+        } catch (Exception throwables) {
+            throwables.printStackTrace();
+        }finally {
+            JDBCUtils.closeConnection(connection,null);
+        }
+    }
+
+    /* *
+     * @Author zhongweiLee
+     * @Description 自己实现一个 ResultHandler实现类
+     * @Date 15:18 2022/4/10
+     * @ParamsType []
+     * @ParamsName []
+     * @return void
+     **/
+    @Test
+    public void testQuery7(){
+        Connection connection = null;
+        try {
+            QueryRunner runner = new QueryRunner();
+
+            connection = JDBCUtils.getConnection4();
+
+            String sql = "select id,name,email,birth from customers where id = ?";
+
+            ResultSetHandler<Customer> handler = new ResultSetHandler<Customer>() {
+                @Override
+                public Customer handle(ResultSet resultSet) throws SQLException {
+                    if (resultSet.next()){
+                        int id = resultSet.getInt("id");
+                        String name = resultSet.getString("name");
+                        String email = resultSet.getString("email");
+                        Date birth = resultSet.getDate("birth");
+                        return new Customer(id, name, email, birth);
+                    }
+                    return null;
+                }
+            };
+            Customer customer = runner.query(connection, sql, handler,12);
+            System.out.println(customer);
+        } catch (Exception throwables) {
+            throwables.printStackTrace();
+        }finally {
+            JDBCUtils.closeConnection(connection,null);
+        }
+    }
+
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
