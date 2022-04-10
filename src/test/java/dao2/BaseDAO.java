@@ -87,6 +87,7 @@ public abstract class BaseDAO<T> {
             if (resultSet.next()){
 
                 //Customer customer = new Customer();
+                //通过反射获取对象实例
                 T t = clazz.getDeclaredConstructor().newInstance();
 
                 for (int i = 0; i < columnCount; i++) {
@@ -96,9 +97,12 @@ public abstract class BaseDAO<T> {
                     //获取每个指定列的列名 -- 不推荐使用
                     //String columnName = metaData.getColumnName(i + 1);
                     //获取每个指定列的别名 -- 推荐使用
+
+
                     //通过结果集元数据获取列别名
                     String columnLabel = metaData.getColumnLabel(i+1);
-                    //通过反射
+
+                    //通过反射 设定对象的属性值
                     //给customer对象的指定 columnName属性赋值为 columnValue : 通过 反射
                     Field field = clazz.getDeclaredField(columnLabel);
                     field.setAccessible(true);
