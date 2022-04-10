@@ -3,6 +3,7 @@ package util;
 import com.alibaba.druid.pool.DruidDataSourceFactory;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.dbcp2.BasicDataSourceFactory;
+import org.apache.commons.dbutils.DbUtils;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -184,6 +185,31 @@ public class JDBCUtils {
 
     }
 
+
+    /* *
+     * @Author zhongweiLee
+     * @Description 使用DBUtils提供的DbUtils工具类关闭资源
+     * @Date 15:31 2022/4/10
+     * @ParamsType [java.sql.Connection, java.sql.Statement, java.sql.ResultSet]
+     * @ParamsName [connection, preparedStatement, resultSet]        
+     * @return void
+     **/
+    public static void closeResource1(Connection connection,Statement preparedStatement,ResultSet resultSet){
+
+/*        try {
+            DbUtils.close(connection);
+            DbUtils.close(preparedStatement);
+            DbUtils.close(resultSet);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }*/
+        DbUtils.closeQuietly(connection);
+        DbUtils.closeQuietly(preparedStatement);
+        DbUtils.closeQuietly(resultSet);
+    }
+
+    
+    
 
 
 
