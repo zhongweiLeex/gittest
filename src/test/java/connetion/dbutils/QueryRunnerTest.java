@@ -89,22 +89,18 @@ public class QueryRunnerTest {
         Connection connection = null;
         try {
             connection = JDBCUtils.getConnection4();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        String sql = "select id,name,email,birth from customers where id < ?";
 
-        BeanListHandler<Customer> handler = new BeanListHandler<>(Customer.class);
-        List<Customer> customer = null;
-        try {
+            String sql = "select id,name,email,birth from customers where id < ?";
+
+            BeanListHandler<Customer> handler = new BeanListHandler<>(Customer.class);
+            List<Customer> customer = null;
             customer = runner.query(connection, sql, handler, 23);
             if (customer != null) {
                 customer.forEach(System.out::println);
             }
-        } catch (SQLException throwables) {
+        } catch (Exception throwables) {
             throwables.printStackTrace();
         }finally {
-
             JDBCUtils.closeConnection(connection,null);
         }
     }
