@@ -268,8 +268,6 @@ public class QueryRunnerTest {
             JDBCUtils.closeConnection(connection,null);
         }
     }
-
-
 }
 
 
